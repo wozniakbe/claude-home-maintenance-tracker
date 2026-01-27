@@ -1,0 +1,54 @@
+{
+  "name": "claude-home-tracker",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "concurrently \"npm run dev:db\" \"nuxt dev\"",
+    "dev:nuxt": "nuxt dev",
+    "dev:db": "turso dev --db-file local.db",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@antfu/eslint-config": "^7.2.0",
+    "@libsql/client": "^0.17.0",
+    "@nuxt/eslint": "^1.13.0",
+    "@nuxt/icon": "^2.2.1",
+    "@pinia/nuxt": "^0.11.3",
+    "@tailwindcss/vite": "^4.1.18",
+    "better-auth": "1.2.4",
+    "concurrently": "^9.2.1",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.7",
+    "drizzle-zod": "0.7.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-format": "^1.3.1",
+    "nanoid": "^5.1.6",
+    "nuxt": "^4.3.0",
+    "nuxt-csurf": "^1.6.5",
+    "pinia": "^3.0.4",
+    "slug": "^11.0.1",
+    "tailwindcss": "^4.1.18",
+    "vue": "^3.5.27",
+    "vue-router": "^4.6.4",
+    "zod": "3.24.2"
+  },
+  "devDependencies": {
+    "@iconify-json/tabler": "^1.2.26",
+    "daisyui": "^5.5.14",
+    "drizzle-kit": "^0.31.8"
+  },
+  "overrides": {
+    "better-auth": "1.2.4",
+    "drizzle-zod": "0.7.0",
+    "zod": "3.24.2"
+  }
+}
