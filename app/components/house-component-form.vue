@@ -4,6 +4,7 @@ import type { SelectHouseComponent } from "~~/lib/db/schema";
 const props = defineProps<{
   houseComponent?: SelectHouseComponent;
   loading?: boolean;
+  cancelUrl?: string;
 }>();
 
 const emit = defineEmits<{
@@ -78,7 +79,7 @@ watch(() => props.houseComponent, (newVal) => {
 
     <div class="flex gap-2 justify-end pt-2">
       <NuxtLink
-        to="/dashboard"
+        :to="cancelUrl || '/dashboard'"
         class="btn btn-ghost"
         :class="{ 'btn-disabled': loading }"
       >

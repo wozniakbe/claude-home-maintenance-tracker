@@ -1,5 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 
+import env from "./lib/env";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -11,6 +13,11 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "nuxt-csurf",
   ],
+  runtimeConfig: {
+    public: {
+      s3BucketUrl: env.S3_BUCKET_URL,
+    },
+  },
   eslint: {
     config: {
       standalone: false,
@@ -20,5 +27,10 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    server: {
+      watch: {
+        ignored: ["./docker-data/*"],
+      },
+    },
   },
 });

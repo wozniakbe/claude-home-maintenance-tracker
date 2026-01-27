@@ -1,8 +1,45 @@
 <script lang="ts" setup>
 const route = useRoute();
+const router = useRouter();
 const slug = route.params.slug as string;
+const { $csrfFetch } = useNuxtApp();
 
-const { data: houseComponent, status } = await useFetch(`/api/house-components/${slug}`);
+const { data: houseComponent, status, refresh } = await useFetch(`/api/house-components/${slug}`);
+
+const showDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+const completingTaskId = ref<number | null>(null);
+
+async function handleDelete() {
+  deleteLoading.value = true;
+  try {
+    await $csrfFetch(`/api/house-components/${slug}`, {
+      method: "DELETE",
+    });
+    router.push("/dashboard");
+  }
+  catch {
+    deleteLoading.value = false;
+    showDeleteDialog.value = false;
+  }
+}
+
+async function handleCompleteTask(taskId: number, status: "completed" | "skipped") {
+  completingTaskId.value = taskId;
+  try {
+    await $csrfFetch(`/api/tasks/${taskId}/complete`, {
+      method: "POST",
+      body: { status },
+    });
+    await refresh();
+  }
+  catch {
+    // Could show error toast
+  }
+  finally {
+    completingTaskId.value = null;
+  }
+}
 </script>
 
 <template>
@@ -46,7 +83,10 @@ const { data: houseComponent, status } = await useFetch(`/api/house-components/$
             <Icon name="tabler:edit" size="18" />
             Edit
           </NuxtLink>
-          <button class="btn btn-ghost btn-sm text-error">
+          <button
+            class="btn btn-ghost btn-sm text-error"
+            @click="showDeleteDialog = true"
+          >
             <Icon name="tabler:trash" size="18" />
             Delete
           </button>
@@ -70,7 +110,7 @@ const { data: houseComponent, status } = await useFetch(`/api/house-components/$
 
         <div
           v-if="!houseComponent.tasks?.length"
-          class="card bg-base-200"
+          class="card bg-base-200 border border-base-300"
         >
           <div class="card-body items-center text-center py-8">
             <Icon
@@ -85,29 +125,13 @@ const { data: houseComponent, status } = await useFetch(`/api/house-components/$
         </div>
 
         <div v-else class="flex flex-col gap-2">
-          <div
+          <TaskCard
             v-for="task in houseComponent.tasks"
             :key="task.id"
-            class="card bg-base-200"
-          >
-            <div class="card-body py-3 px-4">
-              <div class="flex items-center justify-between">
-                <span :class="{ 'line-through text-base-content/50': task.status === 'completed' }">
-                  {{ task.title }}
-                </span>
-                <span
-                  class="badge badge-sm"
-                  :class="{
-                    'badge-warning': task.status === 'pending',
-                    'badge-success': task.status === 'completed',
-                    'badge-ghost': task.status === 'skipped',
-                  }"
-                >
-                  {{ task.status }}
-                </span>
-              </div>
-            </div>
-          </div>
+            :task="task"
+            :loading="completingTaskId === task.id"
+            @complete="handleCompleteTask(task.id, $event)"
+          />
         </div>
       </div>
 
@@ -128,7 +152,7 @@ const { data: houseComponent, status } = await useFetch(`/api/house-components/$
 
         <div
           v-if="!houseComponent.schedules?.length"
-          class="card bg-base-200"
+          class="card bg-base-200 border border-base-300"
         >
           <div class="card-body items-center text-center py-8">
             <Icon
@@ -143,22 +167,24 @@ const { data: houseComponent, status } = await useFetch(`/api/house-components/$
         </div>
 
         <div v-else class="flex flex-col gap-2">
-          <div
+          <ScheduleCard
             v-for="schedule in houseComponent.schedules"
             :key="schedule.id"
-            class="card bg-base-200"
-          >
-            <div class="card-body py-3 px-4">
-              <div class="flex items-center justify-between">
-                <span>{{ schedule.name }}</span>
-                <span class="text-sm text-base-content/70">
-                  Every {{ schedule.intervalDays }} days
-                </span>
-              </div>
-            </div>
-          </div>
+            :schedule="schedule"
+          />
         </div>
       </div>
+
+      <!-- Delete Confirmation Dialog -->
+      <ConfirmDialog
+        :open="showDeleteDialog"
+        title="Delete Component"
+        :message="`Are you sure you want to delete '${houseComponent.name}'? This will also delete all tasks and schedules associated with it. This action cannot be undone.`"
+        confirm-label="Delete"
+        :loading="deleteLoading"
+        @confirm="handleDelete"
+        @cancel="showDeleteDialog = false"
+      />
     </template>
   </div>
 </template>

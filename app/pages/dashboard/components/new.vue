@@ -41,7 +41,7 @@ async function handleSubmit(data: { name: string; description: string | null }) 
       <span>{{ error }}</span>
     </div>
 
-    <div class="card bg-base-200">
+    <div class="card bg-base-200 border border-base-300">
       <div class="card-body">
         <HouseComponentForm :loading="loading" @submit="handleSubmit" />
       </div>

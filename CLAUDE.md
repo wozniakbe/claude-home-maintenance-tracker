@@ -16,6 +16,7 @@ npm run db:generate # Generate migrations from schema changes
 npm run db:migrate  # Run pending migrations
 npm run db:push     # Push schema directly to DB (dev only)
 npm run db:studio   # Open Drizzle Studio GUI
+docker compose up -d  # Start MinIO for image storage (needed for image uploads)
 ```
 
 ## Architecture
@@ -231,6 +232,47 @@ Photo documentation attached to a task.
 9. **Edit a single task** → Modify an individual task without affecting its parent schedule (e.g., change due date for just this occurrence)
 10. **Delete a task** → Remove a single task (completed or pending)
 11. **Delete a component** → Cascades to delete all schedules, tasks, and images associated with the component
+
+## Image Uploads (S3/MinIO)
+
+Uses MinIO locally as an S3-compatible object storage. In production, use AWS S3 or similar.
+
+**Local Setup:**
+```bash
+docker compose up -d  # Start MinIO container
+```
+Then access MinIO Console at `http://localhost:9001` to create the `images` bucket.
+
+**Key files:**
+- `docker-compose.yml` - MinIO service configuration
+- `server/utils/create-s3-client.ts` - S3 client factory
+- `server/api/tasks/[id]/sign-image.post.ts` - Generate presigned upload URL
+- `server/api/tasks/[id]/image.post.ts` - Confirm upload in database
+- `server/api/tasks/[id]/image/[image-id].delete.ts` - Delete image
+- `app/components/image-upload.vue` - Client-side upload component
+- `app/components/image-gallery.vue` - Display images
+
+**Three-step upload process:**
+1. Client requests presigned URL with content length and SHA-256 checksum
+2. Client uploads directly to S3/MinIO using presigned POST
+3. Client confirms upload, server verifies metadata and records in database
+
+**Security:**
+- 1MB max file size
+- SHA-256 checksum validation
+- User/task metadata embedded in S3 objects
+- Presigned URLs expire after 2 minutes
+- Ownership verified on all operations
+
+**Environment variables:**
+```
+S3_ENDPOINT=http://localhost:9000
+S3_ACCESS_KEY=your-minio-access-key
+S3_ACCESS_SECRET=your-minio-secret-key
+S3_REGION=us-east-2
+S3_BUCKET=images
+S3_BUCKET_URL=http://localhost:9000/images
+```
 
 ## Reference Project
 

@@ -72,9 +72,9 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 4: Edit a Component
+### Story 4: Edit a House Component ✅
 
-> As a user, I can edit a component's name or description.
+> As a user, I can edit a house component's name or description.
 
 **Acceptance Criteria:**
 
@@ -85,17 +85,17 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 **Technical Work:**
 
-- `lib/db/queries/component.ts` - `updateComponent()`
-- `PUT /api/components/[slug]` - update endpoint
+- `lib/db/queries/house-component.ts` - `updateHouseComponent()` (already existed)
+- `PUT /api/house-components/[slug]` - update endpoint
 - `app/pages/dashboard/components/[slug]/edit.vue` - edit page
 
 **Test:** Edit Component → Change name → Save → See updated name
 
 ---
 
-### Story 5: Delete a Component
+### Story 5: Delete a House Component ✅
 
-> As a user, I can delete a component I no longer need.
+> As a user, I can delete a house component I no longer need.
 
 **Acceptance Criteria:**
 
@@ -105,15 +105,15 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 **Technical Work:**
 
-- `lib/db/queries/component.ts` - `deleteComponent()`
-- `DELETE /api/components/[slug]` - delete endpoint
+- `lib/db/queries/house-component.ts` - `deleteHouseComponent()` (already existed)
+- `DELETE /api/house-components/[slug]` - delete endpoint
 - `app/components/confirm-dialog.vue` - reusable confirmation modal
 
 **Test:** Delete Component → Confirm → Component removed from list
 
 ---
 
-### Story 6: Add an Ad-hoc Task
+### Story 6: Add an Ad-hoc Task ✅
 
 > As a user, I can add a one-time task to a component (e.g., "Replace smoke detector batteries").
 
@@ -126,7 +126,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 **Technical Work:**
 
 - `lib/db/queries/task.ts` - `createTask()`
-- `POST /api/components/[slug]/tasks` - create endpoint
+- `POST /api/house-components/[slug]/tasks` - create endpoint
 - `app/pages/dashboard/components/[slug]/tasks/new.vue` - add task page
 - `app/components/task-form.vue` - reusable form
 - `app/components/task-card.vue` - task display
@@ -135,7 +135,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 7: Complete a Task
+### Story 7: Complete a Task ✅
 
 > As a user, I can mark a task as completed or skipped.
 
@@ -149,14 +149,13 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 - `lib/db/queries/task.ts` - `completeTask()`
 - `POST /api/tasks/[id]/complete` - complete endpoint
-- `app/components/task-status-badge.vue` - status indicator
-- Update `task-card.vue` with complete action
+- `app/components/task-card.vue` - includes status badge and complete actions
 
 **Test:** Click Complete on task → Task shows as completed with timestamp
 
 ---
 
-### Story 8: View Task Details
+### Story 8: View Task Details ✅
 
 > As a user, I can view a task's full details and edit it.
 
@@ -178,7 +177,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 9: Delete a Task
+### Story 9: Delete a Task ✅
 
 > As a user, I can delete a task I no longer need.
 
@@ -197,7 +196,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 10: Dashboard Overview
+### Story 10: Dashboard Overview ✅
 
 > As a user, my dashboard shows upcoming and overdue tasks across all components.
 
@@ -219,7 +218,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 11: Create a Maintenance Schedule
+### Story 11: Create a Maintenance Schedule ✅
 
 > As a user, I can set up recurring maintenance for a component (e.g., "Replace furnace filter every 90 days").
 
@@ -242,7 +241,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 12: Complete a Scheduled Task
+### Story 12: Complete a Scheduled Task ✅
 
 > As a user, when I complete a scheduled task, the next occurrence is automatically created.
 
@@ -261,7 +260,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 13: Edit/Delete a Schedule
+### Story 13: Edit/Delete a Schedule ✅
 
 > As a user, I can modify or remove a maintenance schedule.
 
@@ -281,7 +280,7 @@ Each story delivers a complete, testable feature. Stories are ordered by depende
 
 ---
 
-### Story 14: Attach Photos to Tasks
+### Story 14: Attach Photos to Tasks ✅
 
 > As a user, I can attach photos to document completed work.
 

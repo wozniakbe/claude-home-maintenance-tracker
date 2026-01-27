@@ -9,7 +9,7 @@ defineProps<{
 <template>
   <NuxtLink
     :to="`/dashboard/components/${houseComponent.slug}`"
-    class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer"
+    class="card bg-base-200 border border-base-300 hover:bg-base-300 transition-colors cursor-pointer"
   >
     <div class="card-body">
       <h3 class="card-title">

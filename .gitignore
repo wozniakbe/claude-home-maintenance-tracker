@@ -27,3 +27,6 @@ logs
 local.db
 local.db-shm
 local.db-wal
+
+# Docker data (MinIO storage)
+docker-data/
