@@ -39,6 +39,7 @@ export default withNuxt(
       "unicorn/filename-case": ["error", {
         case: "kebabCase",
       }],
+      "test/prefer-lowercase-title": "off",
     },
   }),
 );
