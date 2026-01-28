@@ -16,6 +16,9 @@ npm run db:generate # Generate migrations from schema changes
 npm run db:migrate  # Run pending migrations
 npm run db:push     # Push schema directly to DB (dev only)
 npm run db:studio   # Open Drizzle Studio GUI
+npm run test        # Run tests in watch mode
+npm run test:run    # Run tests once
+npm run test:coverage # Run tests with coverage report
 docker compose up -d  # Start MinIO for image storage (needed for image uploads)
 ```
 
@@ -273,6 +276,32 @@ S3_REGION=us-east-2
 S3_BUCKET=images
 S3_BUCKET_URL=http://localhost:9000/images
 ```
+
+## Testing
+
+Uses **Vitest** for testing with a hybrid test organization:
+
+- **Unit tests:** Co-located with implementation (e.g., `lib/db/schema/task.test.ts`)
+- **Integration tests:** In `tests/integration/`
+- **E2E tests:** In `tests/e2e/` (uses Playwright)
+- **Shared fixtures:** In `tests/fixtures/`
+
+**Running tests:**
+```bash
+npm run test        # Watch mode
+npm run test:run    # Run once
+npm run test:coverage # With coverage
+```
+
+**Test file naming:** Use `.test.ts` suffix (e.g., `task.test.ts`, `house-component.test.ts`)
+
+**Key conventions:**
+- Unit tests don't require Nuxt environment (fast, no env vars needed)
+- Integration tests use in-memory SQLite for realistic database testing
+- Mock external services (S3) in tests
+- Use `tests/fixtures/` for shared test data
+
+See `TESTING.md` for full testing strategy and examples.
 
 ## Reference Project
 

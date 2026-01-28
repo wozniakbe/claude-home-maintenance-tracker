@@ -15,7 +15,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@antfu/eslint-config": "^7.2.0",
@@ -45,8 +48,12 @@
   },
   "devDependencies": {
     "@iconify-json/tabler": "^1.2.26",
+    "@nuxt/test-utils": "^3.23.0",
+    "@vue/test-utils": "^2.4.6",
     "daisyui": "^5.5.14",
-    "drizzle-kit": "^0.31.8"
+    "drizzle-kit": "^0.31.8",
+    "happy-dom": "^20.4.0",
+    "vitest": "^3.2.4"
   },
   "overrides": {
     "better-auth": "1.2.4",
