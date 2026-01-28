@@ -6,10 +6,19 @@ const { $csrfFetch } = useNuxtApp();
 
 const { data: houseComponent, status } = await useFetch(`/api/house-components/${slug}`);
 
+// Fetch available parents for the dropdown
+const { data: components } = await useFetch("/api/house-components");
+
+const availableParents = computed(() => {
+  if (!components.value)
+    return [];
+  return components.value.map(c => ({ id: c.id, name: c.name, slug: c.slug }));
+});
+
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-async function handleSubmit(data: { name: string; description: string | null }) {
+async function handleSubmit(data: { name: string; description: string | null; parentId: number | null }) {
   loading.value = true;
   error.value = null;
 
@@ -70,6 +79,7 @@ async function handleSubmit(data: { name: string; description: string | null }) 
         <div class="card-body">
           <HouseComponentForm
             :house-component="houseComponent"
+            :available-parents="availableParents"
             :loading="loading"
             :cancel-url="`/dashboard/components/${slug}`"
             @submit="handleSubmit"

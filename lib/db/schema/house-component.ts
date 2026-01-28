@@ -39,6 +39,7 @@ export const houseComponentRelations = relations(houseComponent, ({ one, many })
 export const InsertHouseComponent = createInsertSchema(houseComponent, {
   name: NameSchema,
   description: DescriptionSchema,
+  parentId: schema => schema.nullable(),
 }).omit({
   id: true,
   slug: true,
@@ -50,6 +51,7 @@ export const InsertHouseComponent = createInsertSchema(houseComponent, {
 export const UpdateHouseComponent = createInsertSchema(houseComponent, {
   name: NameSchema,
   description: DescriptionSchema,
+  parentId: schema => schema.nullable(),
 }).omit({
   id: true,
   slug: true,

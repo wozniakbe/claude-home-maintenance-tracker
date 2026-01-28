@@ -1,4 +1,4 @@
-import { getHouseComponentBySlug } from "~~/lib/db/queries/house-component";
+import { getAncestors, getHouseComponentBySlug } from "~~/lib/db/queries/house-component";
 
 export default defineAuthenticatedEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug");
@@ -19,5 +19,10 @@ export default defineAuthenticatedEventHandler(async (event) => {
     });
   }
 
-  return houseComponent;
+  const ancestors = await getAncestors(event.context.user.id, houseComponent.id);
+
+  return {
+    ...houseComponent,
+    ancestors,
+  };
 });

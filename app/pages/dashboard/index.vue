@@ -142,13 +142,7 @@ const { data: dashboard, status } = await useFetch("/api/dashboard");
                 Add
               </NuxtLink>
             </div>
-            <div class="flex flex-col gap-3">
-              <HouseComponentCard
-                v-for="component in dashboard.houseComponents"
-                :key="component.id"
-                :house-component="component"
-              />
-            </div>
+            <ComponentTree :components="dashboard.componentsTree" />
           </div>
         </div>
       </template>

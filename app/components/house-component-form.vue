@@ -2,18 +2,32 @@
 import type { SelectHouseComponent } from "~~/lib/db/schema";
 
 const props = defineProps<{
-  houseComponent?: SelectHouseComponent;
+  houseComponent?: SelectHouseComponent & { parentId?: number | null };
+  availableParents?: { id: number; name: string; slug: string }[];
+  initialParentId?: number | null;
   loading?: boolean;
   cancelUrl?: string;
 }>();
 
 const emit = defineEmits<{
-  submit: [data: { name: string; description: string | null }];
+  submit: [data: { name: string; description: string | null; parentId: number | null }];
 }>();
 
 const name = ref(props.houseComponent?.name ?? "");
 const description = ref(props.houseComponent?.description ?? "");
+const parentId = ref<number | null>(props.houseComponent?.parentId ?? props.initialParentId ?? null);
 const errors = ref<Record<string, string>>({});
+
+// Filter out the current component and its descendants from available parents
+const filteredParents = computed(() => {
+  if (!props.availableParents)
+    return [];
+  if (!props.houseComponent)
+    return props.availableParents;
+
+  // Can't be its own parent
+  return props.availableParents.filter(p => p.id !== props.houseComponent!.id);
+});
 
 function handleSubmit() {
   errors.value = {};
@@ -31,6 +45,7 @@ function handleSubmit() {
   emit("submit", {
     name: name.value.trim(),
     description: description.value.trim() || null,
+    parentId: parentId.value,
   });
 }
 
@@ -38,6 +53,7 @@ watch(() => props.houseComponent, (newVal) => {
   if (newVal) {
     name.value = newVal.name;
     description.value = newVal.description ?? "";
+    parentId.value = newVal.parentId ?? null;
   }
 });
 </script>
@@ -74,6 +90,31 @@ watch(() => props.houseComponent, (newVal) => {
       />
       <p v-if="errors.description" class="fieldset-label text-error">
         {{ errors.description }}
+      </p>
+    </fieldset>
+
+    <fieldset v-if="filteredParents.length > 0" class="fieldset">
+      <legend class="fieldset-legend">
+        Parent Component (optional)
+      </legend>
+      <select
+        v-model="parentId"
+        class="select w-full"
+        :disabled="loading"
+      >
+        <option :value="null">
+          None (top-level component)
+        </option>
+        <option
+          v-for="parent in filteredParents"
+          :key="parent.id"
+          :value="parent.id"
+        >
+          {{ parent.name }}
+        </option>
+      </select>
+      <p class="fieldset-label text-base-content/70">
+        Organize this component under another component
       </p>
     </fieldset>
 

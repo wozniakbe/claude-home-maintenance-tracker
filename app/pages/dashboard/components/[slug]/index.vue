@@ -60,10 +60,20 @@ async function handleCompleteTask(taskId: number, status: "completed" | "skipped
 
     <!-- Content -->
     <template v-else>
+      <!-- Breadcrumbs -->
+      <Breadcrumbs
+        v-if="houseComponent.ancestors?.length"
+        :ancestors="houseComponent.ancestors"
+        :current-name="houseComponent.name"
+      />
+
       <!-- Header -->
       <div class="flex items-start justify-between gap-4">
         <div class="flex items-center gap-3">
-          <NuxtLink to="/dashboard" class="btn btn-ghost btn-sm btn-square">
+          <NuxtLink
+            :to="houseComponent.parent ? `/dashboard/components/${houseComponent.parent.slug}` : '/dashboard'"
+            class="btn btn-ghost btn-sm btn-square"
+          >
             <Icon name="tabler:arrow-left" size="20" />
           </NuxtLink>
           <div>
@@ -91,6 +101,44 @@ async function handleCompleteTask(taskId: number, status: "completed" | "skipped
             Delete
           </button>
         </div>
+      </div>
+
+      <!-- Child Components Section -->
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">
+            Sub-components
+          </h2>
+          <NuxtLink
+            :to="`/dashboard/components/new?parentId=${houseComponent.id}`"
+            class="btn btn-ghost btn-sm"
+          >
+            <Icon name="tabler:plus" size="18" />
+            Add
+          </NuxtLink>
+        </div>
+        <div v-if="houseComponent.children?.length" class="flex flex-col gap-2">
+          <NuxtLink
+            v-for="child in houseComponent.children"
+            :key="child.id"
+            :to="`/dashboard/components/${child.slug}`"
+            class="card bg-base-200 border border-base-300 hover:bg-base-300 transition-colors"
+          >
+            <div class="card-body py-3 px-4">
+              <div class="flex items-center gap-2">
+                <Icon
+                  name="tabler:home-cog"
+                  size="18"
+                  class="text-base-content/70"
+                />
+                <span class="font-medium">{{ child.name }}</span>
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+        <p v-else class="text-base-content/50 text-sm">
+          No sub-components yet.
+        </p>
       </div>
 
       <!-- Tasks Section -->

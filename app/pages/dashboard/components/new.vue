@@ -1,10 +1,30 @@
 <script lang="ts" setup>
+const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
 const error = ref<string | null>(null);
 const { $csrfFetch } = useNuxtApp();
 
-async function handleSubmit(data: { name: string; description: string | null }) {
+// Get initial parent ID from query parameter
+const initialParentId = computed(() => {
+  const id = route.query.parentId;
+  if (typeof id === "string") {
+    const parsed = Number.parseInt(id, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+});
+
+// Fetch available parents for the dropdown
+const { data: components } = await useFetch("/api/house-components");
+
+const availableParents = computed(() => {
+  if (!components.value)
+    return [];
+  return components.value.map(c => ({ id: c.id, name: c.name, slug: c.slug }));
+});
+
+async function handleSubmit(data: { name: string; description: string | null; parentId: number | null }) {
   loading.value = true;
   error.value = null;
 
@@ -43,7 +63,12 @@ async function handleSubmit(data: { name: string; description: string | null }) 
 
     <div class="card bg-base-200 border border-base-300">
       <div class="card-body">
-        <HouseComponentForm :loading="loading" @submit="handleSubmit" />
+        <HouseComponentForm
+          :loading="loading"
+          :available-parents="availableParents"
+          :initial-parent-id="initialParentId"
+          @submit="handleSubmit"
+        />
       </div>
     </div>
   </div>
