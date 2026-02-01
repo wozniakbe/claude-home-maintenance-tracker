@@ -13,7 +13,13 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "nuxt-csurf",
   ],
+  csurf: {
+    // Disable CSRF in test mode - API integration tests don't use browser sessions
+    // eslint-disable-next-line node/no-process-env
+    enabled: process.env.NODE_ENV !== "test",
+  },
   runtimeConfig: {
+    testAuthBypass: false,
     public: {
       s3BucketUrl: env.S3_BUCKET_URL,
     },

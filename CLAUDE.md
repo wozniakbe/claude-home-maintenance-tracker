@@ -279,29 +279,75 @@ S3_BUCKET_URL=http://localhost:9000/images
 
 ## Testing
 
-Uses **Vitest** for testing with a hybrid test organization:
+Uses **Vitest** with two project configurations (see `vitest.config.ts`):
 
-- **Unit tests:** Co-located with implementation (e.g., `lib/db/schema/task.test.ts`)
-- **Integration tests:** In `tests/integration/`
-- **E2E tests:** In `tests/e2e/` (uses Playwright)
-- **Shared fixtures:** In `tests/fixtures/`
+- **Unit tests** (`unit` project): Co-located with implementation (e.g., `lib/db/schema/task.test.ts`). Run in parallel. No Nuxt environment needed.
+- **Integration tests** (`integration` project): In `tests/integration/api/`. Run sequentially in a single thread (shared file-based SQLite). Start a real Nuxt test server via `@nuxt/test-utils/e2e`.
 
 **Running tests:**
 ```bash
 npm run test        # Watch mode
-npm run test:run    # Run once
+npm run test:run    # Run once (133 unit + 73 integration = 206 tests)
 npm run test:coverage # With coverage
 ```
 
 **Test file naming:** Use `.test.ts` suffix (e.g., `task.test.ts`, `house-component.test.ts`)
 
-**Key conventions:**
-- Unit tests don't require Nuxt environment (fast, no env vars needed)
-- Integration tests use in-memory SQLite for realistic database testing
-- Mock external services (S3) in tests
-- Use `tests/fixtures/` for shared test data
+### Unit Tests
 
-See `TESTING.md` for full testing strategy and examples.
+- Co-located next to implementation files
+- Test Zod schemas and Drizzle query functions with mocked DB
+- No env vars or Nuxt runtime needed
+
+### Integration Tests
+
+Full-stack API tests using `@nuxt/test-utils/e2e` that start a real Nuxt server and make HTTP requests.
+
+**Key files:**
+- `tests/integration/helpers.ts` - DB setup/teardown, authenticated fetch wrappers
+- `tests/integration/api/house-components.test.ts` - Component CRUD (23 tests)
+- `tests/integration/api/tasks.test.ts` - Task CRUD + completion (23 tests)
+- `tests/integration/api/schedules.test.ts` - Schedule CRUD + rotation (18 tests)
+- `tests/integration/api/dashboard.test.ts` - Dashboard aggregation (9 tests)
+- `.env.test` - Test environment variables (file-based SQLite, dummy S3/auth values)
+
+**Auth in tests:** Uses `x-test-user-id` header with runtime config `testAuthBypass: true` (set via `nuxtConfig` in test setup). The auth middleware (`server/middleware/auth.ts`) checks this flag and skips real OAuth.
+
+**Test pattern:**
+```typescript
+describe("API Endpoint", async () => {
+  loadTestEnv();           // Load .env.test before Nuxt starts
+  await setupTestDatabase(); // Create tables in file-based SQLite
+  await setup({            // Start Nuxt test server
+    server: true,
+    nuxtConfig: { runtimeConfig: { testAuthBypass: true } },
+  });
+
+  beforeEach(async () => {
+    await resetDatabase();        // Truncate all tables
+    await seedTestUser("test-user-1"); // Insert test user
+  });
+
+  it("happy path", async () => {
+    const result = await authenticatedFetch("/api/endpoint", {
+      method: "POST",
+      body: { ... },
+    });
+    expect(result.field).toBe("value");
+  });
+
+  it("returns 401 without auth", async () => {
+    const { status } = await unauthenticatedFetchWithStatus("/api/endpoint");
+    expect(status).toBe(401);
+  });
+});
+```
+
+**Why sequential:** Integration tests share a file-based SQLite database (`test.db`). Running files in parallel causes `SQLITE_BUSY` errors. The `singleThread` pool option in `vitest.config.ts` ensures one test file runs at a time.
+
+**Skipped endpoints:** S3-dependent image endpoints (sign-image, image upload/delete) are not covered by integration tests.
+
+See `TESTING.md` for full testing strategy.
 
 ## Reference Project
 
