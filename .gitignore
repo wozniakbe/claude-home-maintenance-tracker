@@ -22,11 +22,15 @@ logs
 .env
 .env.*
 !.env.example
+!.env.test
 
 # Local database
 local.db
 local.db-shm
 local.db-wal
+test.db
+test.db-shm
+test.db-wal
 
 # Docker data (MinIO storage)
 docker-data/
