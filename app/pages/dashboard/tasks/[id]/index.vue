@@ -232,7 +232,7 @@ async function handleDeleteImage() {
                 <div class="absolute bottom-2 right-2">
                   <button
                     class="btn btn-error btn-xs"
-                    @click="confirmDeleteImage(image.id)"
+                    @click.stop="confirmDeleteImage(image.id)"
                   >
                     <Icon name="tabler:trash" size="14" />
                   </button>
