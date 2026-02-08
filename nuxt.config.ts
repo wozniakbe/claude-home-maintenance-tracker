@@ -1,6 +1,10 @@
 import tailwindcss from "@tailwindcss/vite";
+import { execSync } from "node:child_process";
 
 import env from "./lib/env";
+import pkg from "./package.json";
+
+const gitSha = execSync("git rev-parse --short HEAD").toString().trim();
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -92,6 +96,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     testAuthBypass: false,
     public: {
+      appVersion: pkg.version,
+      gitSha,
+      buildDate: new Date().toISOString(),
       s3BucketUrl: env.S3_BUCKET_URL,
     },
   },
