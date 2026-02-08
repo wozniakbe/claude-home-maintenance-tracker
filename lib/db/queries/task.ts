@@ -1,9 +1,13 @@
 import type { CompleteTask, InsertTask, UpdateTask } from "~~/lib/db/schema";
 
-import { and, eq, gt, lt, lte, ne, or } from "drizzle-orm";
+import { and, count, eq, gt, inArray, lt, lte, ne, or } from "drizzle-orm";
 
 import db from "..";
-import { task } from "../schema";
+import { houseComponent, task } from "../schema";
+
+function userComponentIds(userId: string) {
+  return db.select({ id: houseComponent.id }).from(houseComponent).where(eq(houseComponent.userId, userId));
+}
 
 export async function getTasksByHouseComponentId(houseComponentId: number) {
   return db.query.task.findMany({
@@ -95,12 +99,13 @@ export async function getOverdueTasks(userId: string) {
     where: and(
       eq(task.status, "pending"),
       lt(task.dueAt, now),
+      inArray(task.houseComponentId, userComponentIds(userId)),
     ),
     with: {
       houseComponent: true,
     },
     orderBy: (fields, { asc }) => asc(fields.dueAt),
-  }).then(results => results.filter(t => t.houseComponent.userId === userId));
+  });
 }
 
 export async function getUpcomingTasks(userId: string, days: number = 7) {
@@ -110,6 +115,7 @@ export async function getUpcomingTasks(userId: string, days: number = 7) {
   return db.query.task.findMany({
     where: and(
       eq(task.status, "pending"),
+      inArray(task.houseComponentId, userComponentIds(userId)),
       or(
         // Tasks with due date in the next N days
         and(
@@ -124,26 +130,31 @@ export async function getUpcomingTasks(userId: string, days: number = 7) {
       houseComponent: true,
     },
     orderBy: (fields, { asc }) => asc(fields.dueAt),
-  }).then(results => results.filter(t => t.houseComponent.userId === userId));
+  });
 }
 
 export async function getRecentlyCompletedTasks(userId: string, limit: number = 5) {
   return db.query.task.findMany({
-    where: ne(task.status, "pending"),
+    where: and(
+      ne(task.status, "pending"),
+      inArray(task.houseComponentId, userComponentIds(userId)),
+    ),
     with: {
       houseComponent: true,
     },
     orderBy: (fields, { desc }) => desc(fields.completedAt),
-  }).then(results => results.filter(t => t.houseComponent.userId === userId).slice(0, limit));
+    limit,
+  });
 }
 
 export async function getPendingTaskCount(userId: string) {
-  return db.query.task.findMany({
-    where: eq(task.status, "pending"),
-    with: {
-      houseComponent: {
-        columns: { userId: true },
-      },
-    },
-  }).then(results => results.filter(t => t.houseComponent.userId === userId).length);
+  const result = await db
+    .select({ count: count() })
+    .from(task)
+    .where(and(
+      eq(task.status, "pending"),
+      inArray(task.houseComponentId, userComponentIds(userId)),
+    ));
+
+  return result[0].count;
 }

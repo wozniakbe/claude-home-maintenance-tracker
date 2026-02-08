@@ -23,8 +23,8 @@ Need to set up Vitest (or similar) and decide on component testing strategy.
 ### N+1 Query in getAncestors
 The `getAncestors` function loops and queries one ancestor at a time. Could use a recursive CTE or fetch all components once and build in memory.
 
-### In-Memory Filtering for Dashboard
-`getOverdueTasks`, `getUpcomingTasks`, etc. fetch all tasks then filter by userId in JS. Should filter at the database level with proper joins.
+### ~~In-Memory Filtering for Dashboard~~ (RESOLVED)
+~~`getOverdueTasks`, `getUpcomingTasks`, etc. fetch all tasks then filter by userId in JS.~~ Fixed: all four dashboard queries now use `inArray` subquery to filter by userId at the DB level. `getPendingTaskCount` uses SQL `COUNT()`. `getRecentlyCompletedTasks` applies `limit` at DB level.
 
 ### Missing Database Indexes
 Should add indexes on commonly queried fields:

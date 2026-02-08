@@ -347,6 +347,20 @@ describe("task queries", () => {
 
       expect(upcoming).toHaveLength(0);
     });
+
+    it("excludes other users' tasks", async () => {
+      const otherUser = await seedTestUser(dbRef.current!, "other-user");
+      const otherComponent = await seedComponent(otherUser, "Other");
+      await createTask(otherComponent.id, {
+        title: "Their Upcoming",
+        description: null,
+        dueAt: Date.now() + 86400000,
+      });
+
+      const upcoming = await getUpcomingTasks(userId);
+
+      expect(upcoming).toHaveLength(0);
+    });
   });
 
   describe("getRecentlyCompletedTasks", () => {
@@ -374,6 +388,17 @@ describe("task queries", () => {
 
     it("excludes pending tasks", async () => {
       await createTask(componentId, { title: "Pending", description: null });
+
+      const recent = await getRecentlyCompletedTasks(userId);
+
+      expect(recent).toHaveLength(0);
+    });
+
+    it("excludes other users' tasks", async () => {
+      const otherUser = await seedTestUser(dbRef.current!, "other-user");
+      const otherComponent = await seedComponent(otherUser, "Other");
+      const otherTask = await createTask(otherComponent.id, { title: "Their Task", description: null });
+      await completeTask(otherTask.id, { status: "completed" });
 
       const recent = await getRecentlyCompletedTasks(userId);
 
