@@ -28,7 +28,7 @@ export const maintenanceScheduleRelations = relations(maintenanceSchedule, ({ on
   tasks: many(task),
 }));
 
-export const InsertMaintenanceSchedule = createInsertSchema(maintenanceSchedule, {
+const BaseInsertMaintenanceSchedule = createInsertSchema(maintenanceSchedule, {
   name: NameSchema,
   description: DescriptionSchema,
   intervalDays: zod.number().int().min(1, "Interval must be at least 1 day").max(365 * 5, "Interval cannot exceed 5 years"),
@@ -40,7 +40,22 @@ export const InsertMaintenanceSchedule = createInsertSchema(maintenanceSchedule,
   createdAt: true,
 });
 
-export const UpdateMaintenanceSchedule = InsertMaintenanceSchedule.partial();
+export const InsertMaintenanceSchedule = BaseInsertMaintenanceSchedule.extend({
+  firstDueDate: zod.number().nullable().optional(),
+}).refine(
+  (data) => {
+    if (data.firstDueDate == null)
+      return true;
+    const maxAllowed = Date.now() + (data.intervalDays * 24 * 60 * 60 * 1000);
+    return data.firstDueDate <= maxAllowed;
+  },
+  {
+    message: "First due date cannot be further out than the interval allows",
+    path: ["firstDueDate"],
+  },
+);
+
+export const UpdateMaintenanceSchedule = BaseInsertMaintenanceSchedule.partial();
 
 export type InsertMaintenanceSchedule = z.infer<typeof InsertMaintenanceSchedule>;
 export type UpdateMaintenanceSchedule = z.infer<typeof UpdateMaintenanceSchedule>;

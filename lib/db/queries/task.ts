@@ -3,7 +3,7 @@ import type { CompleteTask, InsertTask, UpdateTask } from "~~/lib/db/schema";
 import { and, count, eq, gt, inArray, lt, lte, ne, or } from "drizzle-orm";
 
 import db from "..";
-import { houseComponent, task } from "../schema";
+import { houseComponent, maintenanceSchedule, task } from "../schema";
 
 function userComponentIds(userId: string) {
   return db.select({ id: houseComponent.id }).from(houseComponent).where(eq(houseComponent.userId, userId));
@@ -46,6 +46,20 @@ export async function updateTask(taskId: number, data: UpdateTask) {
     .set(updateData)
     .where(eq(task.id, taskId))
     .returning();
+
+  // Sync dueAt changes on pending scheduled tasks back to the parent schedule
+  if (
+    updated
+    && updated.scheduleId
+    && data.dueAt !== undefined
+    && updated.dueAt != null
+    && updated.status === "pending"
+  ) {
+    await db
+      .update(maintenanceSchedule)
+      .set({ nextDueAt: updated.dueAt })
+      .where(eq(maintenanceSchedule.id, updated.scheduleId));
+  }
 
   return updated;
 }

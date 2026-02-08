@@ -130,6 +130,75 @@ describe("maintenance-schedule schemas", () => {
 
       expect(result.success).toBe(false);
     });
+
+    it("accepts schedule with firstDueDate within interval", () => {
+      const result = InsertMaintenanceSchedule.safeParse({
+        name: "Replace filter",
+        description: null,
+        intervalDays: 30,
+        firstDueDate: Date.now() + 14 * 24 * 60 * 60 * 1000,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts schedule without firstDueDate", () => {
+      const result = InsertMaintenanceSchedule.safeParse({
+        name: "Replace filter",
+        description: null,
+        intervalDays: 30,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts schedule with null firstDueDate", () => {
+      const result = InsertMaintenanceSchedule.safeParse({
+        name: "Replace filter",
+        description: null,
+        intervalDays: 30,
+        firstDueDate: null,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects firstDueDate beyond intervalDays from now", () => {
+      const result = InsertMaintenanceSchedule.safeParse({
+        name: "Replace filter",
+        description: null,
+        intervalDays: 30,
+        firstDueDate: Date.now() + 35 * 24 * 60 * 60 * 1000,
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe("First due date cannot be further out than the interval allows");
+      }
+    });
+
+    it("accepts firstDueDate at exactly intervalDays from now", () => {
+      // Use a small buffer to avoid timing flakiness
+      const result = InsertMaintenanceSchedule.safeParse({
+        name: "Replace filter",
+        description: null,
+        intervalDays: 30,
+        firstDueDate: Date.now() + 30 * 24 * 60 * 60 * 1000 - 1000,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts firstDueDate in the past", () => {
+      const result = InsertMaintenanceSchedule.safeParse({
+        name: "Replace filter",
+        description: null,
+        intervalDays: 30,
+        firstDueDate: Date.now() - 5 * 24 * 60 * 60 * 1000,
+      });
+
+      expect(result.success).toBe(true);
+    });
   });
 
   describe("UpdateMaintenanceSchedule", () => {

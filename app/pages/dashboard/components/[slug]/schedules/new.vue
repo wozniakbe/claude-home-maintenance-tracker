@@ -9,7 +9,7 @@ const { data: houseComponent, status } = await useFetch(`/api/house-components/$
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-async function handleSubmit(data: { name: string; description: string | null; intervalDays: number }) {
+async function handleSubmit(data: { name: string; description: string | null; intervalDays: number; firstDueDate?: number | null }) {
   loading.value = true;
   error.value = null;
 

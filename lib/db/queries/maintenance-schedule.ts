@@ -22,15 +22,18 @@ export async function getScheduleById(scheduleId: number) {
 }
 
 export async function createSchedule(houseComponentId: number, data: InsertMaintenanceSchedule) {
-  // Calculate the first due date from now
+  // Use custom first due date if provided, otherwise calculate from interval
   const now = Date.now();
-  const nextDueAt = now + (data.intervalDays * 24 * 60 * 60 * 1000);
+  const nextDueAt = data.firstDueDate ?? now + (data.intervalDays * 24 * 60 * 60 * 1000);
+
+  // Strip firstDueDate before inserting (not a DB column)
+  const { firstDueDate: _, ...scheduleData } = data;
 
   // Create the schedule
   const [schedule] = await db
     .insert(maintenanceSchedule)
     .values({
-      ...data,
+      ...scheduleData,
       houseComponentId,
       nextDueAt,
     })

@@ -107,6 +107,40 @@ describe("Schedules API", async () => {
 
       expect(status).toBe(401);
     });
+
+    it("creates a schedule with custom firstDueDate", async () => {
+      const fourteenDaysFromNow = Date.now() + 14 * 24 * 60 * 60 * 1000;
+      const schedule = await authenticatedFetch<ApiSchedule>(`/api/house-components/${componentSlug}/schedules`, {
+        method: "POST",
+        body: { name: "Replace filter", description: null, intervalDays: 30, firstDueDate: fourteenDaysFromNow },
+      });
+
+      expect(schedule.nextDueAt).toBe(fourteenDaysFromNow);
+    });
+
+    it("first pending task uses firstDueDate when provided", async () => {
+      const fourteenDaysFromNow = Date.now() + 14 * 24 * 60 * 60 * 1000;
+      const schedule = await authenticatedFetch<ApiSchedule>(`/api/house-components/${componentSlug}/schedules`, {
+        method: "POST",
+        body: { name: "Check furnace", description: null, intervalDays: 30, firstDueDate: fourteenDaysFromNow },
+      });
+
+      const component = await authenticatedFetch<ApiHouseComponentDetail>(`/api/house-components/${componentSlug}`);
+      const scheduleTasks = component.tasks.filter(t => t.scheduleId === schedule.id);
+
+      expect(scheduleTasks).toHaveLength(1);
+      expect(scheduleTasks[0].dueAt).toBe(fourteenDaysFromNow);
+    });
+
+    it("returns 422 when firstDueDate exceeds intervalDays from now", async () => {
+      const thirtyFiveDaysFromNow = Date.now() + 35 * 24 * 60 * 60 * 1000;
+      const { status } = await authenticatedFetchWithStatus(`/api/house-components/${componentSlug}/schedules`, {
+        method: "POST",
+        body: { name: "Test", description: null, intervalDays: 30, firstDueDate: thirtyFiveDaysFromNow },
+      });
+
+      expect(status).toBe(422);
+    });
   });
 
   describe("GET /api/schedules/[id]", () => {
