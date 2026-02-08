@@ -8,12 +8,13 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  submit: [data: { name: string; description: string | null; intervalDays: number }];
+  submit: [data: { name: string; description: string | null; intervalDays: number; firstDueDate?: number | null }];
 }>();
 
 const name = ref(props.schedule?.name ?? "");
 const description = ref(props.schedule?.description ?? "");
 const intervalDays = ref(props.schedule?.intervalDays ?? 30);
+const firstDueDate = ref("");
 const errors = ref<Record<string, string>>({});
 
 // Common interval presets
@@ -48,11 +49,28 @@ function handleSubmit() {
     return;
   }
 
-  emit("submit", {
+  // Validate firstDueDate if provided (creation mode only)
+  let firstDueDateTimestamp: number | null = null;
+  if (!props.schedule && firstDueDate.value) {
+    firstDueDateTimestamp = parseDateAsLocal(firstDueDate.value);
+    const maxAllowed = Date.now() + (intervalDays.value * 24 * 60 * 60 * 1000);
+    if (firstDueDateTimestamp > maxAllowed) {
+      errors.value.firstDueDate = `First due date cannot be more than ${intervalDays.value} days from today`;
+      return;
+    }
+  }
+
+  const data: { name: string; description: string | null; intervalDays: number; firstDueDate?: number | null } = {
     name: name.value.trim(),
     description: description.value.trim() || null,
     intervalDays: intervalDays.value,
-  });
+  };
+
+  if (firstDueDateTimestamp) {
+    data.firstDueDate = firstDueDateTimestamp;
+  }
+
+  emit("submit", data);
 }
 
 watch(() => props.schedule, (newVal) => {
@@ -130,6 +148,25 @@ watch(() => props.schedule, (newVal) => {
       </div>
       <p v-if="errors.intervalDays" class="fieldset-label text-error">
         {{ errors.intervalDays }}
+      </p>
+    </fieldset>
+
+    <fieldset v-if="!schedule" class="fieldset">
+      <legend class="fieldset-legend">
+        First Due Date (optional)
+      </legend>
+      <input
+        v-model="firstDueDate"
+        type="date"
+        class="input w-full"
+        :class="{ 'input-error': errors.firstDueDate }"
+        :disabled="loading"
+      >
+      <p class="fieldset-label">
+        When should the first task be due? Defaults to {{ intervalDays }} days from today.
+      </p>
+      <p v-if="errors.firstDueDate" class="fieldset-label text-error">
+        {{ errors.firstDueDate }}
       </p>
     </fieldset>
 

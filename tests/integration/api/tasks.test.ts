@@ -1,7 +1,7 @@
 import { setup } from "@nuxt/test-utils/e2e";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { ApiDeleteResponse, ApiHouseComponent, ApiHouseComponentDetail, ApiSchedule, ApiTask, ApiTaskDetail } from "../helpers";
+import type { ApiDeleteResponse, ApiHouseComponent, ApiHouseComponentDetail, ApiSchedule, ApiScheduleDetail, ApiTask, ApiTaskDetail } from "../helpers";
 
 import {
   authenticatedFetch,
@@ -201,6 +201,71 @@ describe("Tasks API", async () => {
       });
 
       expect(status).toBe(404);
+    });
+
+    it("syncs dueAt change to parent schedule's nextDueAt", async () => {
+      const schedule = await authenticatedFetch<ApiSchedule>(`/api/house-components/${componentSlug}/schedules`, {
+        method: "POST",
+        body: { name: "Filter check", description: null, intervalDays: 30 },
+      });
+
+      const component = await authenticatedFetch<ApiHouseComponentDetail>(`/api/house-components/${componentSlug}`);
+      const scheduledTask = component.tasks.find(t => t.scheduleId === schedule.id);
+
+      const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+      await authenticatedFetch<ApiTask>(`/api/tasks/${scheduledTask!.id}`, {
+        method: "PUT",
+        body: { dueAt: tomorrow },
+      });
+
+      const updatedSchedule = await authenticatedFetch<ApiScheduleDetail>(`/api/schedules/${schedule.id}`);
+      expect(updatedSchedule.nextDueAt).toBe(tomorrow);
+    });
+
+    it("does not sync dueAt change for completed scheduled tasks", async () => {
+      const schedule = await authenticatedFetch<ApiSchedule>(`/api/house-components/${componentSlug}/schedules`, {
+        method: "POST",
+        body: { name: "Filter check", description: null, intervalDays: 30 },
+      });
+
+      const component = await authenticatedFetch<ApiHouseComponentDetail>(`/api/house-components/${componentSlug}`);
+      const scheduledTask = component.tasks.find(t => t.scheduleId === schedule.id);
+
+      await authenticatedFetch<ApiTask>(`/api/tasks/${scheduledTask!.id}/complete`, {
+        method: "POST",
+        body: { status: "completed" },
+      });
+
+      const scheduleAfterCompletion = await authenticatedFetch<ApiScheduleDetail>(`/api/schedules/${schedule.id}`);
+      const nextDueAfterCompletion = scheduleAfterCompletion.nextDueAt;
+
+      // Edit the completed task's dueAt — should NOT affect schedule
+      const newDueAt = Date.now() + 5 * 24 * 60 * 60 * 1000;
+      await authenticatedFetch<ApiTask>(`/api/tasks/${scheduledTask!.id}`, {
+        method: "PUT",
+        body: { dueAt: newDueAt },
+      });
+
+      const scheduleAfterEdit = await authenticatedFetch<ApiScheduleDetail>(`/api/schedules/${schedule.id}`);
+      expect(scheduleAfterEdit.nextDueAt).toBe(nextDueAfterCompletion);
+    });
+
+    it("does not sync when editing only title on scheduled task", async () => {
+      const schedule = await authenticatedFetch<ApiSchedule>(`/api/house-components/${componentSlug}/schedules`, {
+        method: "POST",
+        body: { name: "Filter check", description: null, intervalDays: 30 },
+      });
+
+      const component = await authenticatedFetch<ApiHouseComponentDetail>(`/api/house-components/${componentSlug}`);
+      const scheduledTask = component.tasks.find(t => t.scheduleId === schedule.id);
+
+      await authenticatedFetch<ApiTask>(`/api/tasks/${scheduledTask!.id}`, {
+        method: "PUT",
+        body: { title: "Updated title" },
+      });
+
+      const updatedSchedule = await authenticatedFetch<ApiScheduleDetail>(`/api/schedules/${schedule.id}`);
+      expect(updatedSchedule.nextDueAt).toBe(schedule.nextDueAt);
     });
   });
 
