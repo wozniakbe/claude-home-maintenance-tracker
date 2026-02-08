@@ -57,6 +57,8 @@ This is a Nuxt 4 application using Vue 3 with the Composition API.
 - **State Management:** Pinia
 - **Validation:** Zod v3.24.2 + drizzle-zod v0.7.0 for schema validation
 - **CSRF Protection:** nuxt-csurf
+- **Image Lightbox:** nuxt-easy-lightbox (click thumbnails to view fullscreen, swipe between images)
+- **PWA:** @vite-pwa/nuxt (standalone display, service worker with runtime caching, add-to-homescreen)
 - **Linting/Formatting:** ESLint with @antfu/eslint-config (handles both linting and formatting)
 
 **CSRF Protection:** Always use `$csrfFetch` instead of `$fetch` for POST, PUT, and DELETE requests. The `nuxt-csurf` module provides this composable which automatically includes the CSRF token.
@@ -166,6 +168,8 @@ A physical item in the house that may require maintenance. Can be hierarchical. 
 | name        | string    | Display name (e.g., "Furnace", "Kitchen Sink") |
 | slug        | string    | URL-friendly identifier (unique per user)      |
 | description | string?   | Optional notes about the component             |
+| room        | string?   | Room location (e.g., "Kitchen", "Master Bedroom") |
+| floor       | int?      | Floor number (0=Basement, 1=First, 2=Second)   |
 | parentId    | int?      | Reference to parent Component (for hierarchy)  |
 | userId      | string    | Reference to User (owner)                      |
 | createdAt   | timestamp | When the component was added                   |
@@ -253,7 +257,7 @@ Then access MinIO Console at `http://localhost:9001` to create the `images` buck
 - `server/api/tasks/[id]/image.post.ts` - Confirm upload in database
 - `server/api/tasks/[id]/image/[image-id].delete.ts` - Delete image
 - `app/components/image-upload.vue` - Client-side upload component
-- `app/components/image-gallery.vue` - Display images
+- `app/components/image-gallery.vue` - Display images with lightbox viewer (click to fullscreen, swipe between)
 
 **Three-step upload process:**
 1. Client requests presigned URL with content length and SHA-256 checksum
@@ -287,7 +291,7 @@ Uses **Vitest** with two project configurations (see `vitest.config.ts`):
 **Running tests:**
 ```bash
 npm run test        # Watch mode
-npm run test:run    # Run once (133 unit + 73 integration = 206 tests)
+npm run test:run    # Run once (150 unit + 78 integration = 228 tests)
 npm run test:coverage # With coverage
 ```
 
@@ -305,7 +309,7 @@ Full-stack API tests using `@nuxt/test-utils/e2e` that start a real Nuxt server 
 
 **Key files:**
 - `tests/integration/helpers.ts` - DB setup/teardown, authenticated fetch wrappers
-- `tests/integration/api/house-components.test.ts` - Component CRUD (23 tests)
+- `tests/integration/api/house-components.test.ts` - Component CRUD (28 tests)
 - `tests/integration/api/tasks.test.ts` - Task CRUD + completion (23 tests)
 - `tests/integration/api/schedules.test.ts` - Schedule CRUD + rotation (18 tests)
 - `tests/integration/api/dashboard.test.ts` - Dashboard aggregation (9 tests)

@@ -114,11 +114,13 @@ Ideas for future features, roughly grouped by theme.
 
 ## Mobile Experience
 
-### Progressive Web App (PWA)
-> As a user, I can install the app on my phone and use it offline for viewing tasks.
+### ~~Progressive Web App (PWA)~~ ✅
+> ~~As a user, I can install the app on my phone and use it offline for viewing tasks.~~
+> Implemented: @vite-pwa/nuxt with standalone display, service worker runtime caching, add-to-homescreen support.
 
-### Mobile-Optimized Image Capture
-> As a user, I can quickly take and upload photos directly from my phone's camera.
+### ~~Mobile-Optimized Image Capture~~ ✅
+> ~~As a user, I can quickly take and upload photos directly from my phone's camera.~~
+> Implemented: image-upload component with `accept="image/*"` opens camera on mobile, client-side resize/compress, direct S3 upload.
 
 ---
 

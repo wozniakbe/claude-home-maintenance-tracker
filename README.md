@@ -9,15 +9,17 @@ A home maintenance tracker that helps homeowners manage and maintain all parts o
 - **Schedule maintenance** - Set recurring intervals (e.g., replace furnace filter every 90 days)
 - **Dashboard overview** - See upcoming, overdue, and recently completed tasks
 - **Ad-hoc tasks** - One-off work items not tied to a schedule
-- **Photo documentation** - Attach images to tasks to document work performed
+- **Photo documentation** - Attach images to tasks with fullscreen lightbox viewer
+- **PWA support** - Install to home screen, standalone app experience, offline caching
 
 ## Tech Stack
 
 - **Framework:** Nuxt 4 with Vue 3
 - **Database:** Drizzle ORM with libSQL/Turso
 - **Authentication:** better-auth with GitHub OAuth
-- **UI:** Tailwind CSS v4 + DaisyUI
-- **Storage:** S3-compatible (MinIO for local dev)
+- **UI:** Tailwind CSS v4 + DaisyUI (business theme)
+- **Storage:** AWS S3 (production) / MinIO (local dev)
+- **Testing:** Vitest (228 tests — unit + integration)
 
 ## Setup
 
@@ -66,6 +68,24 @@ npm run test:coverage
 npm run lint        # Check for issues
 npm run lint:fix    # Auto-fix issues
 ```
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | Turso database URL (`http://127.0.0.1:8080` for local dev) |
+| `DATABASE_AUTH_TOKEN` | Turso auth token (not needed for local dev) |
+| `BETTER_AUTH_SECRET` | Secret key for session encryption |
+| `GITHUB_CLIENT_ID` | GitHub OAuth app client ID |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret |
+| `S3_ENDPOINT` | S3 endpoint (`http://localhost:9000` for MinIO) |
+| `S3_ACCESS_KEY` | S3 access key |
+| `S3_ACCESS_SECRET` | S3 secret key |
+| `S3_REGION` | S3 region |
+| `S3_BUCKET` | S3 bucket name |
+| `S3_BUCKET_URL` | Public URL for the S3 bucket |
 
 ## Production
 
