@@ -42,6 +42,93 @@ describe("house-component schemas", () => {
       expect(result.success).toBe(true);
     });
 
+    it("accepts component with room and floor", () => {
+      const result = InsertHouseComponent.safeParse({
+        name: "Furnace",
+        description: null,
+        room: "Utility Room",
+        floor: 0,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.room).toBe("Utility Room");
+        expect(result.data.floor).toBe(0);
+      }
+    });
+
+    it("accepts null room and floor", () => {
+      const result = InsertHouseComponent.safeParse({
+        name: "Furnace",
+        description: null,
+        room: null,
+        floor: null,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects floor outside 0-2 range", () => {
+      const result = InsertHouseComponent.safeParse({
+        name: "Furnace",
+        description: null,
+        floor: 3,
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects negative floor", () => {
+      const result = InsertHouseComponent.safeParse({
+        name: "Furnace",
+        description: null,
+        floor: -1,
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects non-integer floor", () => {
+      const result = InsertHouseComponent.safeParse({
+        name: "Furnace",
+        description: null,
+        floor: 1.5,
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("accepts all valid floor values (0, 1, 2)", () => {
+      for (const floor of [0, 1, 2]) {
+        const result = InsertHouseComponent.safeParse({
+          name: "Test",
+          description: null,
+          floor,
+        });
+        expect(result.success).toBe(true);
+      }
+    });
+
+    it("rejects room over 100 characters", () => {
+      const result = InsertHouseComponent.safeParse({
+        name: "Furnace",
+        description: null,
+        room: "x".repeat(101),
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("accepts room at exactly 100 characters", () => {
+      const result = InsertHouseComponent.safeParse({
+        name: "Furnace",
+        description: null,
+        room: "x".repeat(100),
+      });
+
+      expect(result.success).toBe(true);
+    });
+
     it("requires name", () => {
       const result = InsertHouseComponent.safeParse({
         description: null,
@@ -151,6 +238,30 @@ describe("house-component schemas", () => {
     it("rejects invalid description when provided", () => {
       const result = UpdateHouseComponent.safeParse({
         description: "x".repeat(1001),
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("accepts partial update with only room", () => {
+      const result = UpdateHouseComponent.safeParse({
+        room: "Kitchen",
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts partial update with only floor", () => {
+      const result = UpdateHouseComponent.safeParse({
+        floor: 1,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects invalid floor when provided", () => {
+      const result = UpdateHouseComponent.safeParse({
+        floor: 5,
       });
 
       expect(result.success).toBe(false);

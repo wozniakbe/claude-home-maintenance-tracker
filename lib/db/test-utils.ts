@@ -44,6 +44,8 @@ export async function setupTestSchema(db: TestDb) {
       name TEXT NOT NULL,
       slug TEXT NOT NULL,
       description TEXT,
+      room TEXT,
+      floor INTEGER,
       parent_id INTEGER REFERENCES houseComponent(id) ON DELETE CASCADE,
       user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
       created_at INTEGER NOT NULL,

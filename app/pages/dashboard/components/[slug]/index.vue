@@ -80,6 +80,18 @@ async function handleCompleteTask(taskId: number, status: "completed" | "skipped
             <h1 class="text-2xl font-bold">
               {{ houseComponent.name }}
             </h1>
+            <div
+              v-if="houseComponent.floor !== null || houseComponent.room"
+              class="flex items-center gap-2 mt-1 text-sm text-base-content/70"
+            >
+              <Icon name="tabler:map-pin" size="16" />
+              <span v-if="houseComponent.floor !== null" class="badge badge-sm badge-ghost">
+                {{ houseComponent.floor === 0 ? 'Basement' : houseComponent.floor === 1 ? 'First Floor' : 'Second Floor' }}
+              </span>
+              <span v-if="houseComponent.room">
+                {{ houseComponent.room }}
+              </span>
+            </div>
             <p v-if="houseComponent.description" class="text-base-content/70 mt-1">
               {{ houseComponent.description }}
             </p>

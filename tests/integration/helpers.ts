@@ -103,6 +103,8 @@ export async function setupTestDatabase() {
       name TEXT NOT NULL,
       slug TEXT NOT NULL,
       description TEXT,
+      room TEXT,
+      floor INTEGER,
       parent_id INTEGER REFERENCES houseComponent(id) ON DELETE CASCADE,
       user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
       created_at INTEGER NOT NULL,
@@ -190,6 +192,8 @@ export type ApiHouseComponent = {
   name: string;
   slug: string;
   description: string | null;
+  room: string | null;
+  floor: number | null;
   parentId: number | null;
   userId: string;
   createdAt: number;
