@@ -112,6 +112,40 @@ describe("House Components API", async () => {
       expect(child.parentId).toBe(parent.id);
     });
 
+    it("creates a component with room and floor", async () => {
+      const component = await authenticatedFetch<ApiHouseComponent>("/api/house-components", {
+        method: "POST",
+        body: { name: "Furnace", description: null, room: "Utility Room", floor: 0 },
+      });
+
+      expect(component.room).toBe("Utility Room");
+      expect(component.floor).toBe(0);
+    });
+
+    it("nulls room and floor for sub-components", async () => {
+      const parent = await authenticatedFetch<ApiHouseComponent>("/api/house-components", {
+        method: "POST",
+        body: { name: "Garage", description: null, room: "Garage", floor: 1 },
+      });
+      const child = await authenticatedFetch<ApiHouseComponent>("/api/house-components", {
+        method: "POST",
+        body: { name: "Garage Door", description: null, parentId: parent.id, room: "Should be nulled", floor: 2 },
+      });
+
+      expect(child.parentId).toBe(parent.id);
+      expect(child.room).toBeNull();
+      expect(child.floor).toBeNull();
+    });
+
+    it("returns 422 for invalid floor value", async () => {
+      const { status } = await authenticatedFetchWithStatus("/api/house-components", {
+        method: "POST",
+        body: { name: "Test", description: null, floor: 5 },
+      });
+
+      expect(status).toBe(422);
+    });
+
     it("returns 409 for duplicate name", async () => {
       await authenticatedFetch<ApiHouseComponent>("/api/house-components", {
         method: "POST",
@@ -233,6 +267,41 @@ describe("House Components API", async () => {
 
       expect(updated.description).toBe("New description");
       expect(updated.slug).toBe("furnace");
+    });
+
+    it("updates room and floor", async () => {
+      await authenticatedFetch<ApiHouseComponent>("/api/house-components", {
+        method: "POST",
+        body: { name: "Furnace", description: null },
+      });
+
+      const updated = await authenticatedFetch<ApiHouseComponent>("/api/house-components/furnace", {
+        method: "PUT",
+        body: { room: "Basement", floor: 0 },
+      });
+
+      expect(updated.room).toBe("Basement");
+      expect(updated.floor).toBe(0);
+    });
+
+    it("nulls room and floor when becoming a sub-component", async () => {
+      const parent = await authenticatedFetch<ApiHouseComponent>("/api/house-components", {
+        method: "POST",
+        body: { name: "House", description: null },
+      });
+      await authenticatedFetch<ApiHouseComponent>("/api/house-components", {
+        method: "POST",
+        body: { name: "Furnace", description: null, room: "Utility Room", floor: 0 },
+      });
+
+      const updated = await authenticatedFetch<ApiHouseComponent>("/api/house-components/furnace", {
+        method: "PUT",
+        body: { parentId: parent.id },
+      });
+
+      expect(updated.parentId).toBe(parent.id);
+      expect(updated.room).toBeNull();
+      expect(updated.floor).toBeNull();
     });
 
     it("returns 404 for non-existent component", async () => {

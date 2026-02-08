@@ -92,6 +92,37 @@ describe("house-component queries", () => {
 
       expect(child.parentId).toBe(parent.id);
     });
+
+    it("creates component with room and floor", async () => {
+      const component = await createHouseComponent(userId, {
+        name: "Furnace",
+        description: null,
+        room: "Utility Room",
+        floor: 0,
+      });
+
+      expect(component.room).toBe("Utility Room");
+      expect(component.floor).toBe(0);
+    });
+
+    it("nulls room and floor for sub-components", async () => {
+      const parent = await createHouseComponent(userId, {
+        name: "Garage",
+        description: null,
+        room: "Garage",
+        floor: 1,
+      });
+      const child = await createHouseComponent(userId, {
+        name: "Garage Door",
+        description: null,
+        parentId: parent.id,
+        room: "Should be nulled",
+        floor: 2,
+      });
+
+      expect(child.room).toBeNull();
+      expect(child.floor).toBeNull();
+    });
   });
 
   describe("getHouseComponentsByUserId", () => {
@@ -232,6 +263,42 @@ describe("house-component queries", () => {
       });
 
       expect(updated).toBeUndefined();
+    });
+
+    it("updates room and floor", async () => {
+      const created = await createHouseComponent(userId, {
+        name: "Furnace",
+        description: null,
+      });
+
+      const updated = await updateHouseComponent(userId, created.slug, {
+        room: "Basement",
+        floor: 0,
+      });
+
+      expect(updated.room).toBe("Basement");
+      expect(updated.floor).toBe(0);
+    });
+
+    it("nulls room and floor when setting parentId", async () => {
+      const parent = await createHouseComponent(userId, {
+        name: "House",
+        description: null,
+      });
+      const created = await createHouseComponent(userId, {
+        name: "Furnace",
+        description: null,
+        room: "Utility Room",
+        floor: 0,
+      });
+
+      const updated = await updateHouseComponent(userId, created.slug, {
+        parentId: parent.id,
+      });
+
+      expect(updated.parentId).toBe(parent.id);
+      expect(updated.room).toBeNull();
+      expect(updated.floor).toBeNull();
     });
   });
 

@@ -16,6 +16,17 @@ defineProps<{
         <Icon name="tabler:home-cog" size="20" />
         {{ houseComponent.name }}
       </h3>
+      <div
+        v-if="houseComponent.floor !== null || houseComponent.room"
+        class="flex items-center gap-2 text-sm text-base-content/70"
+      >
+        <span v-if="houseComponent.floor !== null" class="badge badge-sm badge-ghost">
+          {{ houseComponent.floor === 0 ? 'Basement' : houseComponent.floor === 1 ? 'First Floor' : 'Second Floor' }}
+        </span>
+        <span v-if="houseComponent.room">
+          {{ houseComponent.room }}
+        </span>
+      </div>
       <p
         v-if="houseComponent.description"
         class="text-base-content/70 line-clamp-2"

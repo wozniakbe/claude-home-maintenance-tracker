@@ -62,9 +62,14 @@ export async function createHouseComponent(userId: string, data: InsertHouseComp
   const baseSlug = slugify(data.name, { lower: true });
   const slug = await findUniqueSlug(baseSlug);
 
+  // Sub-components inherit location from parent — clear room/floor
+  const values = data.parentId
+    ? { ...data, room: null, floor: null, slug, userId }
+    : { ...data, slug, userId };
+
   const [created] = await db
     .insert(houseComponent)
-    .values({ ...data, slug, userId })
+    .values(values)
     .returning();
 
   return created;
@@ -77,6 +82,12 @@ export async function updateHouseComponent(userId: string, slug: string, data: U
   if (data.name) {
     const baseSlug = slugify(data.name, { lower: true });
     updates.slug = await findUniqueSlug(baseSlug);
+  }
+
+  // If becoming a sub-component, clear location fields
+  if (data.parentId) {
+    updates.room = null;
+    updates.floor = null;
   }
 
   const [updated] = await db

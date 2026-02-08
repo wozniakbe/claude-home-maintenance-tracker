@@ -5,7 +5,7 @@ import { relations } from "drizzle-orm";
 import { int, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 
-import { DescriptionSchema, NameSchema } from "../zod-schemas";
+import { DescriptionSchema, FloorSchema, NameSchema, RoomSchema } from "../zod-schemas";
 import { user } from "./auth";
 import { maintenanceSchedule } from "./maintenance-schedule";
 import { task } from "./task";
@@ -15,6 +15,8 @@ export const houseComponent = sqliteTable("houseComponent", {
   name: text().notNull(),
   slug: text().notNull(),
   description: text(),
+  room: text(),
+  floor: int(),
   parentId: int().references((): AnySQLiteColumn => houseComponent.id, { onDelete: "cascade" }),
   userId: text().notNull().references(() => user.id, { onDelete: "cascade" }),
   createdAt: int().notNull().$default(() => Date.now()),
@@ -39,6 +41,8 @@ export const houseComponentRelations = relations(houseComponent, ({ one, many })
 export const InsertHouseComponent = createInsertSchema(houseComponent, {
   name: NameSchema,
   description: DescriptionSchema,
+  room: RoomSchema.optional(),
+  floor: FloorSchema.optional(),
   parentId: schema => schema.nullable(),
 }).omit({
   id: true,
@@ -51,6 +55,8 @@ export const InsertHouseComponent = createInsertSchema(houseComponent, {
 export const UpdateHouseComponent = createInsertSchema(houseComponent, {
   name: NameSchema,
   description: DescriptionSchema,
+  room: RoomSchema,
+  floor: FloorSchema,
   parentId: schema => schema.nullable(),
 }).omit({
   id: true,
