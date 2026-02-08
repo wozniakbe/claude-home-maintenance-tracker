@@ -135,7 +135,7 @@ const { data: dashboard, status } = await useFetch("/api/dashboard");
           <div>
             <div class="flex items-center justify-between mb-3">
               <h2 class="text-lg font-semibold">
-                Your Components
+                Your House
               </h2>
               <NuxtLink to="/dashboard/components/new" class="btn btn-ghost btn-sm">
                 <Icon name="tabler:plus" size="18" />
