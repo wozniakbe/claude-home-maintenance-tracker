@@ -8,16 +8,18 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  submit: [data: { title: string; description: string | null; dueAt: number | null; status?: TaskStatus }];
+  submit: [data: { title: string; description: string | null; dueAt: number | null; status?: TaskStatus; completedAt?: number | null }];
 }>();
 
 const title = ref(props.task?.title ?? "");
 const description = ref(props.task?.description ?? "");
 const dueAt = ref(props.task?.dueAt ? formatDateForInput(props.task.dueAt) : "");
 const status = ref<TaskStatus>(props.task?.status ?? "pending");
+const completedAt = ref(props.task?.completedAt ? formatDateForInput(props.task.completedAt) : "");
 
 // Show status field only when editing a completed/skipped task
 const showStatusField = computed(() => props.task && props.task.status !== "pending");
+const showCompletedAtField = computed(() => status.value !== "pending");
 const errors = ref<Record<string, string>>({});
 
 function formatDateForInput(timestamp: number): string {
@@ -31,7 +33,13 @@ function formatDateForInput(timestamp: number): string {
 
 function parseDateAsLocal(dateString: string): number {
   // Parse "YYYY-MM-DD" as local time, not UTC
-  const [year, month, day] = dateString.split("-").map(Number);
+  const parts = dateString.split("-").map(Number);
+  const year = parts[0];
+  const month = parts[1];
+  const day = parts[2];
+  if (year === undefined || month === undefined || day === undefined) {
+    throw new Error(`Invalid date format: "${dateString}", expected YYYY-MM-DD`);
+  }
   return new Date(year, month - 1, day).getTime();
 }
 
@@ -48,7 +56,7 @@ function handleSubmit() {
     return;
   }
 
-  const data: { title: string; description: string | null; dueAt: number | null; status?: TaskStatus } = {
+  const data: { title: string; description: string | null; dueAt: number | null; status?: TaskStatus; completedAt?: number | null } = {
     title: title.value.trim(),
     description: description.value.trim() || null,
     dueAt: dueAt.value ? parseDateAsLocal(dueAt.value) : null,
@@ -57,6 +65,11 @@ function handleSubmit() {
   // Only include status when editing and it changed
   if (showStatusField.value) {
     data.status = status.value;
+  }
+
+  // Include completedAt when task is completed/skipped
+  if (showCompletedAtField.value && completedAt.value) {
+    data.completedAt = parseDateAsLocal(completedAt.value);
   }
 
   emit("submit", data);
@@ -68,6 +81,7 @@ watch(() => props.task, (newVal) => {
     description.value = newVal.description ?? "";
     dueAt.value = newVal.dueAt ? formatDateForInput(newVal.dueAt) : "";
     status.value = newVal.status;
+    completedAt.value = newVal.completedAt ? formatDateForInput(newVal.completedAt) : "";
   }
 });
 </script>
@@ -140,6 +154,21 @@ watch(() => props.task, (newVal) => {
       </select>
       <p class="fieldset-label">
         Change to "Pending" to reopen this task
+      </p>
+    </fieldset>
+
+    <fieldset v-if="showCompletedAtField" class="fieldset">
+      <legend class="fieldset-legend">
+        Completed Date
+      </legend>
+      <input
+        v-model="completedAt"
+        type="date"
+        class="input w-full"
+        :disabled="loading"
+      >
+      <p class="fieldset-label">
+        When this task was completed or skipped
       </p>
     </fieldset>
 
