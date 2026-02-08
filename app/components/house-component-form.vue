@@ -75,6 +75,7 @@ watch(() => props.houseComponent, (newVal) => {
       <input
         v-model="name"
         type="text"
+        autocapitalize="words"
         placeholder="e.g., Furnace, Kitchen Sink, Garage"
         class="input w-full"
         :class="{ 'input-error': errors.name }"

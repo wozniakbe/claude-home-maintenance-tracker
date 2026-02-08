@@ -6,6 +6,7 @@ import env from "./lib/env";
 export default defineNuxtConfig({
   app: {
     head: {
+      title: "Home Tracker",
       link: [
         { rel: "icon", type: "image/svg+xml", href: "/TablerHomeCog.svg" },
       ],
