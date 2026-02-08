@@ -50,7 +50,9 @@ export const InsertTask = createInsertSchema(task, {
   createdAt: true,
 });
 
-export const UpdateTask = InsertTask.partial();
+export const UpdateTask = InsertTask.partial().extend({
+  completedAt: zod.number().nullable().optional(),
+});
 
 export const CompleteTask = zod.object({
   status: zod.enum(["completed", "skipped"]),
