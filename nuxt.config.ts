@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@pinia/nuxt",
     "nuxt-csurf",
+    "nuxt-easy-lightbox",
   ],
   csurf: {
     // Disable CSRF in test mode - API integration tests don't use browser sessions
