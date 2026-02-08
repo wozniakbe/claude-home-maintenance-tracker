@@ -19,9 +19,9 @@ The testing pyramid suggests more unit tests, fewer E2E tests. For this app, I'd
 
 ---
 
-## Libraries Needed
+## Libraries ~~Needed~~ Installed ✅
 
-### Core
+### Core — ✅ Installed
 ```bash
 npm install -D vitest @nuxt/test-utils @vue/test-utils happy-dom
 ```
@@ -1062,15 +1062,15 @@ export function mockAuthContext(userId: string) {
 
 ## Priority Recommendations
 
-### Phase 1: Foundation
-1. Set up Vitest and basic configuration
-2. Write unit tests for all query functions in `lib/db/queries/*`
-3. Write unit tests for Zod schemas
+### ~~Phase 1: Foundation~~ ✅
+1. ~~Set up Vitest and basic configuration~~
+2. ~~Write unit tests for all query functions in `lib/db/queries/*`~~
+3. ~~Write unit tests for Zod schemas~~
 
-### Phase 2: API Coverage
-4. Set up integration test infrastructure
-5. Write tests for all API endpoints
-6. Ensure auth/authorization is tested
+### ~~Phase 2: API Coverage~~ ✅
+4. ~~Set up integration test infrastructure~~
+5. ~~Write tests for all API endpoints~~
+6. ~~Ensure auth/authorization is tested~~
 
 ### Phase 3: Component Tests
 7. Test form components (HouseComponentForm, TaskForm, ScheduleForm)

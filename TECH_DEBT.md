@@ -6,15 +6,16 @@ Areas to address for maintainability, performance, and code quality.
 
 ## Testing
 
-### No Test Coverage
-Currently zero tests. Should add:
-- Unit tests for query functions and utilities
-- API endpoint tests (integration)
+### ~~No Test Coverage~~ ✅
+~~Currently zero tests.~~ 228 tests implemented:
+- ~~Unit tests for query functions and utilities~~ ✅ 150 unit tests (schemas + query functions)
+- ~~API endpoint tests (integration)~~ ✅ 78 integration tests (components, tasks, schedules, dashboard)
 - Component tests for critical UI flows (forms, dialogs)
 - E2E tests for core user journeys
 
-### Test Infrastructure
-Need to set up Vitest (or similar) and decide on component testing strategy.
+### ~~Test Infrastructure~~ ✅
+~~Need to set up Vitest (or similar) and decide on component testing strategy.~~
+Vitest configured with two project configurations (unit + integration). See `vitest.config.ts`.
 
 ---
 
@@ -105,9 +106,9 @@ Some date formatting is duplicated across components. Should extract to shared u
 ### No Seeding Script
 No easy way to populate the database with sample data for development/testing.
 
-### Missing Dev Documentation
-CLAUDE.md covers basics, but could use more on:
-- How to run tests (once added)
+### ~~Missing Dev Documentation~~ (Partially Resolved)
+~~CLAUDE.md covers basics, but could use more on:~~
+- ~~How to run tests (once added)~~ ✅ Full testing docs in CLAUDE.md
 - Database migration workflow
 - Deployment process
 
